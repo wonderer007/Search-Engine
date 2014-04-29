@@ -1,32 +1,32 @@
-import json
-import urllib2
 from bs4 import BeautifulSoup
+from constants import *
 from TwitterAPI import TwitterAPI
 from scrap import Scraper
 import time
+import json
+import urllib2
 
-
-Access_token        = "171007935-2P970TAIQYIdS4lxqp8x6ZzX58eHMc2blmBwLoA7"
-Access_token_secret = "uSDbw9JMJIECHlD5WLeymCwaiP99pnzu8XkfxJJ4GHwRk"
-CONSUMER_KEY        = "FphPZ38AD3wHRfL7JjxHyQ"
-CONSUMER_SECRET     = "FfGDAXDiEdupjn2Bmy9rS1byCAj2gAVzeLB5b6LOo"
-TRACK_TERM = 'jobs in lahore'
-api = TwitterAPI(CONSUMER_KEY, CONSUMER_SECRET, Access_token, Access_token_secret)
-count =0
-max_id = None
-
+#api = TwitterAPI(CONSUMER_KEY, CONSUMER_SECRET, Access_token, Access_token_secret)
+count , max_id = init()
+count
 
 for x in range(30):
     if x%5 is 0:
         api = TwitterAPI(CONSUMER_KEY, CONSUMER_SECRET, Access_token, Access_token_secret)
 
+    if x%15 is 0:
+        save_config(count, max_id)
+
     json_str = {}
-    json_str['q'] = "Jobs in Lahore"
-    json_str['count'] = "2"
+    json_str['q'] = search_query
+    json_str['count'] = "50"
     if max_id is not None:
     	json_str['max_id'] = max_id
 
-    r = api.request('search/tweets', json_str)
+    try:
+        r = api.request('search/tweets', json_str)
+    except:
+        pass
     for item in r.get_iterator():
         max_id = item['id']
         if item['entities']['urls']:

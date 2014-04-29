@@ -1,23 +1,18 @@
 from bs4 import BeautifulSoup
 from mongo import MongoDB
+from constants import *
 import urllib2
 import urllib
 import threading
 import json
 
-mongo_database = "my_db"
-mongo_collection = "tweets"
-mongo_host = "localhost"
-mongo_port = 27017
+
 
 class Scraper(threading.Thread):
-	base_dir = "/home/haider/Development/JobSearch/data/"
+	
 	mongo = MongoDB(mongo_host, mongo_port, mongo_database, mongo_collection)
 	tweet = mongo.db.tweets
 	urls = {}
-
-
-
 
 	def __init__(self, _id, _url, _json):
 		threading.Thread.__init__(self)
@@ -40,7 +35,10 @@ class Scraper(threading.Thread):
 		self.urls[self.url] = True
 		header = {'User-Agent': 'Mozilla/5.0'}
 		req = urllib2.Request(self.url,headers=header)
-		page = urllib2.urlopen(req)
+		try:
+			page = urllib2.urlopen(req)
+		except:
+			return
 		soup = BeautifulSoup(page)
 
 		# kill all script and style elements
@@ -56,7 +54,7 @@ class Scraper(threading.Thread):
 		chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
 		# drop blank lines
 		text = '\n'.join(chunk for chunk in chunks if chunk)
-		fin = open(self.base_dir+ str(self.id), "w")
+		fin = open(base_dir+ str(self.id), "w")
 		self.tweet.insert(self.json)
 		print "Tweet inserted in mongo"
 		fin.write(text.encode('utf-8'))
