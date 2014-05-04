@@ -16,32 +16,43 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
 
-count , max_id = init()
+count =0
+cities = get_cities()
+api = None
 
-for x in range(2):
-    if x%5 is 0:
-        api = TwitterAPI(CONSUMER_KEY, CONSUMER_SECRET, Access_token, Access_token_secret)
+for city in cities:
+    print city
+    print "-------------"
 
-    json_str = {}
-    json_str['q'] = search_query
-    json_str['count'] = "100"
-    if max_id is not None:
-    	json_str['max_id'] = max_id
-    
-    try:
-        r = api.request('search/tweets', json_str)
-    except:
-        pass
+    tmp_count =0
+    max_id = None
+    finish = False
+    while not finish:
+        if api is None:
+            api = TwitterAPI(CONSUMER_KEY, CONSUMER_SECRET, Access_token, Access_token_secret)
 
-    for item in r.get_iterator():
-        max_id = item['id']
-        if item['entities']['urls']:
-            max_id = item['id']
-            item['ser_id'] = count
-            count +=1
-            thread = Scraper(item['entities']['urls'][0]['expanded_url'], item)
-            thread.start()
-            if count%5 is 0:
-                save_config(count, max_id)
+        tmp_count +=1
+        json_str = {}
+        json_str['q'] = "%s %s" % ("jobs", city)
+        json_str['count'] = "2"
 
-    time.sleep(3)
+        if max_id is not None:
+        	json_str['max_id'] = max_id
+        
+        try:
+            r = api.request('search/tweets', json_str)
+            response = json.loads(r.response.text)
+        except:
+            pass
+
+        for tweet in response['statuses']:
+            max_id = tweet['id']
+            if tweet['entities']['urls']:
+                max_id = tweet['id']
+                tweet['ser_id'] = count
+                count +=1
+                thread = Scraper(tweet['entities']['urls'][0]['expanded_url'], tweet)
+                thread.start()
+        
+        if not response['statuses'] or tmp_count is 2:
+            finish = True

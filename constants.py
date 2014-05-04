@@ -1,14 +1,10 @@
-def init():
-    fin    = open("conf","r")
-    line   = fin.read()
-    fin.close()
-    if line:
-        return int(line.split()[0]), line.split()[1]
-    return 0, None
+def get_cities():
+    fin    = open("cities.txt","r")
+    cities = []
+    for city in fin:
+    	cities.append(city)
+    return cities
 
-def save_config(doc_id, _id):
-	fout = open("conf", "w")
-	fout.write("%s %s"% (doc_id, _id))
 
 Access_token        = "171007935-2P970TAIQYIdS4lxqp8x6ZzX58eHMc2blmBwLoA7"
 Access_token_secret = "uSDbw9JMJIECHlD5WLeymCwaiP99pnzu8XkfxJJ4GHwRk"

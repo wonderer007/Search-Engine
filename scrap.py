@@ -25,7 +25,7 @@ class Scraper(threading.Thread):
 	mongo = MongoDB(mongo_host, mongo_port, mongo_database, mongo_collection)
 	tweet = mongo.db.tweets
 	urls = {}
-	count = 1
+	count =1
 
 
 	def __init__(self, _url, _json):
@@ -78,6 +78,7 @@ class Scraper(threading.Thread):
 		Scraper.count +=1
 		self.tweet.insert(self.json)
 		print "Tweet inserted in mongo"
+		logger.info("Tweet inserted in mongo")
 		fin.write(text.encode('utf-8'))
 		fin.close()
 
