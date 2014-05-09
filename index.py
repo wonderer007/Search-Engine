@@ -19,22 +19,26 @@ logger.addHandler(hdlr)
 count =0
 cities = get_cities()
 api = None
+fopen = open("log/output.txt","w")
+
 
 for city in cities:
     print city
     print "-------------"
+    fopen.write(city+"\n")
 
-    tmp_count =0
+
     max_id = None
     finish = False
     while not finish:
+        pre_count = Scraper.count
         if api is None:
             api = TwitterAPI(CONSUMER_KEY, CONSUMER_SECRET, Access_token, Access_token_secret)
 
-        tmp_count +=1
+
         json_str = {}
         json_str['q'] = "%s %s" % ("jobs", city)
-        json_str['count'] = "2"
+        json_str['count'] = "100"
 
         if max_id is not None:
         	json_str['max_id'] = max_id
@@ -51,8 +55,19 @@ for city in cities:
                 max_id = tweet['id']
                 tweet['ser_id'] = count
                 count +=1
+                fopen.write(tweet['text'].encode('utf-8') +"\n")
+                fopen.write(str(count) + "\n")
+                fopen.write("--------" + "\n")
                 thread = Scraper(tweet['entities']['urls'][0]['expanded_url'], tweet)
                 thread.start()
         
-        if not response['statuses'] or tmp_count is 2:
+        if not response['statuses']:
             finish = True
+
+        if pre_count is Scraper.count:
+            finish = True
+        time.sleep(3)
+
+
+fopen.write("File Closed")
+fopen.close()
